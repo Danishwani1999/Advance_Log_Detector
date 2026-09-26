@@ -1,4 +1,4 @@
-AIOps Log Anomaly Detector
+## AIOps Log Anomaly Detector
 
 A lightweight log analysis tool built for modern DevOps pipelines. Instead of relying on rigid, hardcoded rules, this script combines Regex line parsing, TF-IDF text analysis, and Isolation Forest machine learning to automatically detect and rank unusual server log events.
 
