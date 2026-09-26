@@ -1,0 +1,23 @@
+# Python Virtual Environments
+Advance_Log_Detector/
+venv/
+.venv/
+env/
+
+# Python Cache & Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Log Files & Datasets
+*.log
+system_logs.txt
+
+# Editor & OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environment variables / Secrets
+.env
