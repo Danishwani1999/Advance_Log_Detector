@@ -18,5 +18,5 @@ Feature Fusion: Combines scalar metrics (log level severity score and message le
 
 Anomaly Scoring: Trains an Isolation Forest model on the feature matrix and uses decision_function() to assign continuous severity scores rather than binary flags.
 
-Prerequisites
+## Prerequisites
 Python 3.8+
