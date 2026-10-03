@@ -12,9 +12,9 @@
 
 ## 📋 Table of Contents
 - [About the Project](#-about-the-project)
-- [System Architecture](#-system-architecture)
+- [System Architecture](#️-system-architecture)
 - [Key Features](#-key-features)
-- [Tech Stack](#-tech-stack)
+- [Tech Stack](#️️-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
@@ -22,7 +22,7 @@
   - [Local Setup](#local-setup)
 - [Verifying Metrics & Observability](#-verifying-metrics--observability)
 - [Testing & Synthetic Anomaly Generation](#-testing--synthetic-anomaly-generation)
-- [Configuration](#️-configuration)
+- [Configuration](#️️-configuration)
 - [How It Works Under the Hood](#-how-it-works-under-the-hood)
 - [License](#-license)
 
@@ -45,26 +45,29 @@ graph TD
     B -->|Anomaly Scores| C[exporter.py: Prometheus Metrics Exporter]
     C -->|Metrics Stream :8000| D[Prometheus Server]
     D --> E[Observability & Alerting Dashboard]
-✨ Key Features
-Unsupervised ML Scoring: Uses scikit-learn Isolation Forest to flag rare log anomalies without requiring labeled training datasets.
+```
 
-Prometheus Observability: Exposes real-time anomaly metrics on port 8000 for scraping by Prometheus.
+---
 
-Container Ready: Fully containerized with a Dockerfile and docker-compose.yml for quick deployment.
+## ✨ Key Features
+* **Unsupervised ML Scoring:** Uses `scikit-learn` Isolation Forest to flag rare log anomalies without requiring labeled training datasets.
+* **Prometheus Observability:** Exposes real-time anomaly metrics on port `8000` for scraping by Prometheus.
+* **Container Ready:** Fully containerized with a `Dockerfile` and `docker-compose.yml` for quick deployment.
+* **Data Preprocessing:** Leverages `pandas` to structure raw text log entries before feeding them to the anomaly model.
 
-Data Preprocessing: Leverages pandas to structure raw text log entries before feeding them to the anomaly model.
+---
 
-🛠️ Tech Stack
-Language: Python 3.9+
+## 🛠️ Tech Stack
+* **Language:** Python 3.9+
+* **Data & Machine Learning:** `pandas`, `scikit-learn` (`IsolationForest`)
+* **Observability:** `prometheus-client`, Prometheus
+* **DevOps & Infrastructure:** Docker, Docker Compose
 
-Data & Machine Learning: pandas, scikit-learn (IsolationForest)
+---
 
-Observability: prometheus-client, Prometheus
+## 📁 Project Structure
 
-DevOps & Infrastructure: Docker, Docker Compose
-
-📁 Project Structure
-Plaintext
+```text
 Advance_Log_Detector/
 ├── detector.py          # Core log parsing & Isolation Forest anomaly detection engine
 ├── exporter.py          # Prometheus metrics exporter (:8000/metrics)
@@ -75,12 +78,18 @@ Advance_Log_Detector/
 ├── requirements.txt     # Python dependencies (pandas, scikit-learn, prometheus-client)
 ├── .gitignore
 └── README.md            # Project documentation
-🚀 Getting Started
-Prerequisites
-Docker & Docker Compose OR Python 3.9+ installed locally.
+```
 
-Docker Setup (Recommended)
-Bash
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+* Docker & Docker Compose **OR** Python 3.9+ installed locally.
+
+### Docker Setup (Recommended)
+
+```bash
 # 1. Clone the repository
 git clone git@github.com:Danishwani1999/Advance_Log_Detector.git
 
@@ -89,8 +98,11 @@ cd Advance_Log_Detector
 
 # 3. Build and launch application & Prometheus containers
 docker-compose up --build
-Local Setup
-Bash
+```
+
+### Local Setup
+
+```bash
 # 1. Create a virtual environment
 python3 -m venv venv
 
@@ -108,39 +120,51 @@ python detector.py
 
 # 5. Start Prometheus metrics exporter
 python exporter.py
-📊 Verifying Metrics & Observability
-Once exporter.py or Docker Compose is running:
+```
 
-Prometheus Metrics Stream: Open http://localhost:8000 in your browser to view raw metrics published by exporter.py.
+---
 
-Prometheus Target UI: Open http://localhost:9090 to query metrics via PromQL (e.g., log_anomalies_total).
+## 📊 Verifying Metrics & Observability
 
-🧪 Testing & Synthetic Anomaly Generation
-Want to test the detector in real time? Append a synthetic error or brute-force pattern to sample.log:
+Once `exporter.py` or Docker Compose is running:
+* **Prometheus Metrics Stream:** Open `http://localhost:8000` in your browser to view raw metrics published by `exporter.py`.
+* **Prometheus Target UI:** Open `http://localhost:9090` to query metrics via PromQL (e.g., `log_anomalies_total`).
 
-Bash
+---
+
+## 🧪 Testing & Synthetic Anomaly Generation
+
+Want to test the detector in real time? Append a synthetic error or brute-force pattern to `sample.log`:
+
+```bash
 # Append an anomalous log entry to trigger the ML detector
 echo "2026-10-03 11:40:00 [CRITICAL] Authentication bypass attempt detected from IP 192.168.1.99" >> sample.log
 
 # Re-run the detector to verify the anomaly score spike
 python detector.py
-⚙️ Configuration
-Key model settings inside detector.py:
+```
 
-contamination: Sensitivity threshold for IsolationForest (default: 0.05 / top 5% flagged as anomalies).
+---
 
-max_features: TF-IDF feature extraction dimensions.
+## ⚙️ Configuration
 
-sample_log_path: Path to target log file stream (default: ./sample.log).
+Key model settings inside `detector.py`:
+* **`contamination`:** Sensitivity threshold for `IsolationForest` (default: `0.05` / top 5% flagged as anomalies).
+* **`max_features`:** TF-IDF feature extraction dimensions.
+* **`sample_log_path`:** Path to target log file stream (default: `./sample.log`).
 
-🧠 How It Works Under the Hood
-Feature Extraction: Log lines are loaded using pandas and transformed into numeric feature vectors using TF-IDF / structured feature encoding.
+---
 
-Anomaly Isolation: IsolationForest randomly partitions feature values. Because anomalous log events (like sudden kernel panics or brute-force floods) are rare and distinct, they require fewer splits to isolate, yielding higher anomaly scores.
+## 🧠 How It Works Under the Hood
+1. **Feature Extraction:** Log lines are loaded using `pandas` and transformed into numeric feature vectors using TF-IDF / structured feature encoding.
+2. **Anomaly Isolation:** `IsolationForest` randomly partitions feature values. Because anomalous log events (like sudden kernel panics or brute-force floods) are rare and distinct, they require fewer splits to isolate, yielding higher anomaly scores.
+3. **Metric Exporting:** `exporter.py` runs a lightweight HTTP server publishing metrics (e.g., total log count, anomaly count, threat levels) that Prometheus scrapes periodically.
 
-Metric Exporting: exporter.py runs a lightweight HTTP server publishing metrics (e.g., total log count, anomaly count, threat levels) that Prometheus scrapes periodically.
+---
 
-📄 License
-Distributed under the MIT License. See LICENSE for more details.
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more details.
 
-Developed by Danish Wani
+---
+
+*Developed by [Danish Wani](https://github.com/Danishwani1999)*
