@@ -11,7 +11,6 @@
 ## 📋 Table of Contents
 - [About the Project](#-about-the-project)
 - [System Architecture](#-system-architecture)
-- [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
