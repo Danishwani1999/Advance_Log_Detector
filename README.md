@@ -1,16 +1,17 @@
-# 🕵️‍♂️ Advance Log Detector
+# 🕵️‍♂️️ Advance Log Detector
 
 ![Build Status](https://img.shields.io/badge/build-passing-success)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> An intelligent, high-performance log analysis tool built to parse, monitor, and flag anomalies in server logs in real time. 
+> An intelligent, high-performance log analysis tool built to parse, monitor, and flag anomalies in server logs in real time.
 
 ---
 
 ## 📋 Table of Contents
 - [About the Project](#-about-the-project)
 - [System Architecture](#-system-architecture)
+- [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
@@ -37,13 +38,23 @@ I built this project to demonstrate low-level log parsing, memory-efficient data
 *The diagram below outlines how the detector parses incoming stream data into actionable alerts:*
 
 ```mermaid
-graph TD;
-    A[Raw Log Files / Streams] --> B(Log Ingestion Engine);
-    B --> C{Pattern Matching & Regex};
-    C -- Normal Logs --> D[Database / Output Log];
-    C -- Suspicious / Errors --> E[Alerting System];
-    E --> F((Admin CLI / Summary Dashboard));
-    D --> F;
+graph TD
+    A[Raw Log Files / Streams] --> B[Log Ingestion Engine]
+    B --> C{Pattern Matching & Regex}
+    C -->|Normal Logs| D[Database / Log Store]
+    C -->|Suspicious / Errors| E[Alerting System]
+    E --> F[Admin CLI / Dashboard]
+    D --> F
+```
+
+---
+
+## ✨ Key Features
+* **Real-time File Tailing:** Streams logs dynamically as they are written to disk.
+* **Smart Pattern Matching:** Uses compiled Regular Expressions (Regex) to extract IPs, HTTP status codes, and timestamps.
+* **Anomaly Detection Engine:** Flags brute-force attempts (e.g., repeated HTTP 401/403) and sudden spikes in 5xx server errors.
+* **Memory Efficient:** Processes large multi-gigabyte log files line-by-line using Python generators, keeping RAM usage near constant.
+
 ---
 
 ## 🛠️ Tech Stack
@@ -58,7 +69,7 @@ graph TD;
 ### Prerequisites
 Make sure Python 3.9 or higher is installed on your machine:
 ```bash
-# Verify Python version
+# Check Python version
 python3 --version
 ```
 
@@ -74,13 +85,13 @@ cd Advance_Log_Detector
 # 3. Create a virtual environment
 python3 -m venv venv
 
-# 4. Activate the environment
+# 4. Activate the virtual environment
 # On Linux/macOS:
 source venv/bin/activate
 # On Windows:
 # venv\Scripts\activate
 
-# 5. Install required dependencies
+# 5. Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -92,16 +103,16 @@ pip install -r requirements.txt
 ```python
 from log_detector import Detector
 
-# Initialize the detector with your log file path
+# Initialize detector with log file path
 detector = Detector(file_path="/var/log/nginx/access.log")
 
-# Run the scanner with strict anomaly detection enabled
+# Start scan with strict anomaly rules
 detector.start_scan(strict_mode=True)
 ```
 
 ### Option 2: Command Line Interface
 ```bash
-# Run the detection engine on a log file from the terminal
+# Run detection on a target log file from CLI
 python main.py --log /path/to/logfile.log --level critical
 ```
 
