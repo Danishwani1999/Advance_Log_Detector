@@ -44,10 +44,104 @@ graph TD;
     C -- Suspicious / Errors --> E[Alerting System];
     E --> F((Admin CLI / Summary Dashboard));
     D --> F;
+---
 
-🛠️ Tech Stack
-Language: Python 3.9+
+## 🛠️ Tech Stack
+* **Language:** Python 3.9+
+* **Data Processing:** Regular Expressions (`re` module)
+* **Testing & Quality:** `pytest`
 
-Data Processing: Regular Expressions (re module)
+---
 
-Testing & Quality: pytest
+## 🚀 Getting Started
+
+### Prerequisites
+Make sure Python 3.9 or higher is installed on your machine:
+```bash
+# Verify Python version
+python3 --version
+```
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone git@github.com:Danishwani1999/Advance_Log_Detector.git
+
+# 2. Navigate into the project directory
+cd Advance_Log_Detector
+
+# 3. Create a virtual environment
+python3 -m venv venv
+
+# 4. Activate the environment
+# On Linux/macOS:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# 5. Install required dependencies
+pip install -r requirements.txt
+```
+
+---
+
+## 💻 Usage
+
+### Option 1: Python Module
+```python
+from log_detector import Detector
+
+# Initialize the detector with your log file path
+detector = Detector(file_path="/var/log/nginx/access.log")
+
+# Run the scanner with strict anomaly detection enabled
+detector.start_scan(strict_mode=True)
+```
+
+### Option 2: Command Line Interface
+```bash
+# Run the detection engine on a log file from the terminal
+python main.py --log /path/to/logfile.log --level critical
+```
+
+---
+
+## 🧠 How It Works Under the Hood
+1. **Stream-based Processing:** Loading massive log files entirely into RAM causes memory exhaustion. This project leverages Python generators (`yield`) to evaluate entries line-by-line.
+2. **Pre-compiled Regex Patterns:** Regular expressions are compiled once at initialization to maximize execution speed per line.
+3. **Sliding Time Windows:** Detection logic tracks repeating failures from identical IP addresses over configurable time frames (e.g., 10 failed logins within 60 seconds).
+
+---
+
+## 📁 Project Structure
+```text
+Advance_Log_Detector/
+├── data/                  # Sample log files for testing
+├── src/
+│   ├── __init__.py
+│   ├── detector.py        # Core anomaly detection logic
+│   ├── parser.py          # Regex parser and line splitters
+│   └── utils.py           # Helper functions & formatting
+├── tests/                 # Unit tests with PyTest
+├── .gitignore
+├── main.py                # Command-line entry point
+├── requirements.txt       # Project dependencies
+└── README.md
+```
+
+---
+
+## 🔮 Future Roadmap
+- [ ] Add integrations for Slack/Discord webhook alerts.
+- [ ] Create an interactive terminal dashboard using `rich` or `blessed`.
+- [ ] Export parsing metrics into Prometheus format.
+
+---
+
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+*Developed by [Danish Wani](https://github.com/Danishwani1999)*
