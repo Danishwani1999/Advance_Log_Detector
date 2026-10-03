@@ -1,10 +1,12 @@
-# 🕵️‍♂️️ Advance Log Detector
+# 🕵️‍♂️ Advance Log Detector
 
 ![Build Status](https://img.shields.io/badge/build-passing-success)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![Prometheus](https://img.shields.io/badge/prometheus-monitored-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> An intelligent, high-performance log analysis tool built to parse, monitor, and flag anomalies in server logs in real time.
+> An AIOps log anomaly detection tool powered by Machine Learning (`IsolationForest`) with built-in Prometheus observability metrics and Docker support.
 
 ---
 
@@ -13,136 +15,122 @@
 - [System Architecture](#-system-architecture)
 - [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#-usage)
+  - [Docker Setup](#docker-setup-recommended)
+  - [Local Setup](#local-setup)
+- [Usage & Metrics](#-usage--metrics)
 - [How It Works Under the Hood](#-how-it-works-under-the-hood)
-- [Project Structure](#-project-structure)
-- [Future Roadmap](#-future-roadmap)
 - [License](#-license)
 
 ---
 
 ## 📖 About the Project
-When web servers scale or security breaches happen, answers are buried inside millions of log entries. Reading these files manually is impossible. 
+Traditional log analysis relies on static regex rules and hardcoded threshold alerts that flood engineers with false positives while missing unknown failure patterns.
 
-**Advance Log Detector** is an automated monitoring tool designed to ingest raw log files, apply efficient pattern matching, and detect anomalies (like brute-force attacks or server failures) before they lead to severe downtime.
-
-I built this project to demonstrate low-level log parsing, memory-efficient data streaming, and clean command-line interfaces suitable for modern backend and DevOps environments.
+**Advance Log Detector** is an AI-assisted AIOps solution that uses unsupervised Machine Learning (`IsolationForest`) to parse system logs, extract text vectors, score anomalies automatically, and export real-time metrics directly to **Prometheus**.
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️️ System Architecture
 
-*The diagram below outlines how the detector parses incoming stream data into actionable alerts:*
+*The diagram below illustrates the ML anomaly scoring pipeline and Prometheus metric export flow:*
 
 ```mermaid
 graph TD
-    A[Raw Log Files / Streams] --> B[Log Ingestion Engine]
-    B --> C{Pattern Matching & Regex}
-    C -->|Normal Logs| D[Database / Log Store]
-    C -->|Suspicious / Errors| E[Alerting System]
-    E --> F[Admin CLI / Dashboard]
-    D --> F
+    A[Log Files / Streams] --> B[detector.py: Log Parser & Isolation Forest Model]
+    B -->|Anomaly Scores| C[exporter.py: Prometheus Metrics Exporter]
+    C -->|Metrics Stream :8000| D[Prometheus Server]
+    D --> E[Observability & Alerting Dashboard]
 ```
 
 ---
 
 ## ✨ Key Features
-* **Real-time File Tailing:** Streams logs dynamically as they are written to disk.
-* **Smart Pattern Matching:** Uses compiled Regular Expressions (Regex) to extract IPs, HTTP status codes, and timestamps.
-* **Anomaly Detection Engine:** Flags brute-force attempts (e.g., repeated HTTP 401/403) and sudden spikes in 5xx server errors.
-* **Memory Efficient:** Processes large multi-gigabyte log files line-by-line using Python generators, keeping RAM usage near constant.
+* **Unsupervised ML Scoring:** Uses `scikit-learn` Isolation Forest to flag rare log anomalies without requiring labeled training datasets.
+* **Prometheus Observability:** Exposes real-time anomaly metrics on port `8000` for scraping by Prometheus.
+* **Container Ready:** Fully containerized with a `Dockerfile` and `docker-compose.yml` for quick deployment.
+* **Data Preprocessing:** Leverages `pandas` to structure raw text log entries before feeding them to the anomaly model.
 
 ---
 
 ## 🛠️ Tech Stack
 * **Language:** Python 3.9+
-* **Data Processing:** Regular Expressions (`re` module)
-* **Testing & Quality:** `pytest`
+* **Data & Machine Learning:** `pandas`, `scikit-learn` (`IsolationForest`)
+* **Observability:** `prometheus-client`, Prometheus
+* **DevOps & Infrastructure:** Docker, Docker Compose
+
+---
+
+## 📁 Project Structure
+
+```text
+Advance_Log_Detector/
+├── detector.py          # Core log parsing & Isolation Forest anomaly detection engine
+├── exporter.py          # Prometheus metrics exporter (:8000/metrics)
+├── sample.log           # Sample log dataset for local testing
+├── Dockerfile           # Application container image configuration
+├── docker-compose.yml   # Multi-container setup (Detector + Prometheus)
+├── prometheus.yml       # Prometheus scraping configuration
+├── requirements.txt     # Python dependencies (pandas, scikit-learn, prometheus-client)
+├── .gitignore
+└── README.md            # Project documentation
+```
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-Make sure Python 3.9 or higher is installed on your machine:
-```bash
-# Check Python version
-python3 --version
-```
+* Docker & Docker Compose **OR** Python 3.9+ installed locally.
 
-### Installation
+### Docker Setup (Recommended)
 
 ```bash
 # 1. Clone the repository
 git clone git@github.com:Danishwani1999/Advance_Log_Detector.git
 
-# 2. Navigate into the project directory
+# 2. Move into project directory
 cd Advance_Log_Detector
 
-# 3. Create a virtual environment
+# 3. Build and launch application & Prometheus containers
+docker-compose up --build
+```
+
+### Local Setup
+
+```bash
+# 1. Create a virtual environment
 python3 -m venv venv
 
-# 4. Activate the virtual environment
+# 2. Activate virtual environment
 # On Linux/macOS:
 source venv/bin/activate
 # On Windows:
 # venv\Scripts\activate
 
-# 5. Install dependencies
+# 3. Install required libraries
 pip install -r requirements.txt
-```
 
----
+# 4. Run anomaly detection on sample logs
+python detector.py
 
-## 💻 Usage
-
-### Option 1: Python Module
-```python
-from log_detector import Detector
-
-# Initialize detector with log file path
-detector = Detector(file_path="/var/log/nginx/access.log")
-
-# Start scan with strict anomaly rules
-detector.start_scan(strict_mode=True)
-```
-
-### Option 2: Command Line Interface
-```bash
-# Run detection on a target log file from CLI
-python main.py --log /path/to/logfile.log --level critical
+# 5. Start Prometheus metrics exporter
+python exporter.py
 ```
 
 ---
 
 ## 🧠 How It Works Under the Hood
-1. **Stream-based Processing:** Loading massive log files entirely into RAM causes memory exhaustion. This project leverages Python generators (`yield`) to evaluate entries line-by-line.
-2. **Pre-compiled Regex Patterns:** Regular expressions are compiled once at initialization to maximize execution speed per line.
-3. **Sliding Time Windows:** Detection logic tracks repeating failures from identical IP addresses over configurable time frames (e.g., 10 failed logins within 60 seconds).
+1. **Feature Extraction:** Log lines are loaded using `pandas` and transformed into numeric feature vectors using TF-IDF / structured feature encoding.
+2. **Anomaly Isolation:** `IsolationForest` randomly partitions feature values. Because anomalous log events (like sudden kernel panics or brute-force floods) are rare and distinct, they require fewer splits to isolate, yielding higher anomaly scores.
+3. **Metric Exporting:** `exporter.py` runs a lightweight HTTP server publishing metrics (e.g., total log count, anomaly count, threat levels) that Prometheus scrapes periodically.
 
 ---
 
-## 📁 Project Structure
-```text
-Advance_Log_Detector/
-├── data/                  # Sample log files for testing
-├── src/
-│   ├── __init__.py
-│   ├── detector.py        # Core anomaly detection logic
-│   ├── parser.py          # Regex parser and line splitters
-│   └── utils.py           # Helper functions & formatting
-├── tests/                 # Unit tests with PyTest
-├── .gitignore
-├── main.py                # Command-line entry point
-├── requirements.txt       # Project dependencies
-└── README.md
-```
-
 ## 📄 License
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE` for more details.
 
 ---
 
