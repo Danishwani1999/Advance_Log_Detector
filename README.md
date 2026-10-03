@@ -1,22 +1,47 @@
-## AIOps Log Anomaly Detector
+# 🕵️‍♂️ Advance Log Detector
 
-A lightweight log analysis tool built for modern DevOps pipelines. Instead of relying on rigid, hardcoded rules, this script combines Regex line parsing, TF-IDF text analysis, and Isolation Forest machine learning to automatically detect and rank unusual server log events.
+![Build Status](https://img.shields.io/badge/build-passing-success)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Why This Project?
+> An intelligent, high-performance log analysis tool built to parse, monitor, and flag anomalies in server logs in real time. 
 
-Traditional log monitoring alerts on fixed triggers (like level == "ERROR"). However, rare system failures, silent timeouts, and unknown error messages often slip through static filters.
+---
 
-This project treats log monitoring as an unsupervised anomaly detection problem—converting raw log text into numerical features so an ML model can spot unexpected behaviors on its own.
+## 📋 Table of Contents
+- [About the Project](#-about-the-project)
+- [System Architecture](#-system-architecture)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#-usage)
+- [How It Works Under the Hood](#-how-it-works-under-the-hood)
+- [Project Structure](#-project-structure)
+- [Future Roadmap](#-future-roadmap)
+- [License](#-license)
 
-## How It Works
+---
 
-Raw Log File --> Regex Extraction --> TF-IDF Text Vectorization --> Isolation Forest ML --> Severity-Ranked Alerts
+## 📖 About the Project
+When web servers scale or security breaches happen, answers are buried inside millions of log entries. Reading these files manually is impossible. 
 
-Safe Parsing: Uses regular expressions (re) to quietly ignore malformed lines and reliably extract timestamps, log levels, and messages.
+**Advance Log Detector** is an automated monitoring tool designed to ingest raw log files, apply efficient pattern matching, and detect anomalies (like brute-force attacks or 5xx server failures) before they lead to severe downtime.
 
-Feature Fusion: Combines scalar metrics (log level severity score and message length) with TF-IDF vectors that capture rare message keywords ("timeout", "refused", "dump").
+I built this project to demonstrate low-level log parsing, memory-efficient data streaming, and clean command-line interfaces suitable for modern backend and DevOps environments.
 
-Anomaly Scoring: Trains an Isolation Forest model on the feature matrix and uses decision_function() to assign continuous severity scores rather than binary flags.
+---
 
-## Prerequisites
-Python 3.8+
+## 🏗️ System Architecture
+
+*The diagram below outlines how the detector parses incoming stream data into actionable alerts:*
+
+```mermaid
+graph TD;
+    A[Raw Log Files / Streams] --> B(Log Ingestion Engine);
+    B --> C{Pattern Matching & Regex};
+    C -- Normal Logs --> D[Database / Output Log];
+    C -- Suspicious / Errors --> E[Alerting System];
+    E --> F((Admin CLI / Summary Dashboard));
+    D --> F;
