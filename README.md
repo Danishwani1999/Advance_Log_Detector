@@ -18,9 +18,11 @@
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
-  - [Docker Setup](#docker-setup-recommended)
+  - [Docker Setup (Recommended)](#docker-setup-recommended)
   - [Local Setup](#local-setup)
-- [Usage & Metrics](#-usage--metrics)
+- [Verifying Metrics & Observability](#-verifying-metrics--observability)
+- [Testing & Synthetic Anomaly Generation](#-testing--synthetic-anomaly-generation)
+- [Configuration](#️-configuration)
 - [How It Works Under the Hood](#-how-it-works-under-the-hood)
 - [License](#-license)
 
@@ -33,7 +35,7 @@ Traditional log analysis relies on static regex rules and hardcoded threshold al
 
 ---
 
-## 🏗️️ System Architecture
+## 🏗 System Architecture
 
 *The diagram below illustrates the ML anomaly scoring pipeline and Prometheus metric export flow:*
 
@@ -43,95 +45,3 @@ graph TD
     B -->|Anomaly Scores| C[exporter.py: Prometheus Metrics Exporter]
     C -->|Metrics Stream :8000| D[Prometheus Server]
     D --> E[Observability & Alerting Dashboard]
-```
-
----
-
-## ✨ Key Features
-* **Unsupervised ML Scoring:** Uses `scikit-learn` Isolation Forest to flag rare log anomalies without requiring labeled training datasets.
-* **Prometheus Observability:** Exposes real-time anomaly metrics on port `8000` for scraping by Prometheus.
-* **Container Ready:** Fully containerized with a `Dockerfile` and `docker-compose.yml` for quick deployment.
-* **Data Preprocessing:** Leverages `pandas` to structure raw text log entries before feeding them to the anomaly model.
-
----
-
-## 🛠️ Tech Stack
-* **Language:** Python 3.9+
-* **Data & Machine Learning:** `pandas`, `scikit-learn` (`IsolationForest`)
-* **Observability:** `prometheus-client`, Prometheus
-* **DevOps & Infrastructure:** Docker, Docker Compose
-
----
-
-## 📁 Project Structure
-
-```text
-Advance_Log_Detector/
-├── detector.py          # Core log parsing & Isolation Forest anomaly detection engine
-├── exporter.py          # Prometheus metrics exporter (:8000/metrics)
-├── sample.log           # Sample log dataset for local testing
-├── Dockerfile           # Application container image configuration
-├── docker-compose.yml   # Multi-container setup (Detector + Prometheus)
-├── prometheus.yml       # Prometheus scraping configuration
-├── requirements.txt     # Python dependencies (pandas, scikit-learn, prometheus-client)
-├── .gitignore
-└── README.md            # Project documentation
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-* Docker & Docker Compose **OR** Python 3.9+ installed locally.
-
-### Docker Setup (Recommended)
-
-```bash
-# 1. Clone the repository
-git clone git@github.com:Danishwani1999/Advance_Log_Detector.git
-
-# 2. Move into project directory
-cd Advance_Log_Detector
-
-# 3. Build and launch application & Prometheus containers
-docker-compose up --build
-```
-
-### Local Setup
-
-```bash
-# 1. Create a virtual environment
-python3 -m venv venv
-
-# 2. Activate virtual environment
-# On Linux/macOS:
-source venv/bin/activate
-# On Windows:
-# venv\Scripts\activate
-
-# 3. Install required libraries
-pip install -r requirements.txt
-
-# 4. Run anomaly detection on sample logs
-python detector.py
-
-# 5. Start Prometheus metrics exporter
-python exporter.py
-```
-
----
-
-## 🧠 How It Works Under the Hood
-1. **Feature Extraction:** Log lines are loaded using `pandas` and transformed into numeric feature vectors using TF-IDF / structured feature encoding.
-2. **Anomaly Isolation:** `IsolationForest` randomly partitions feature values. Because anomalous log events (like sudden kernel panics or brute-force floods) are rare and distinct, they require fewer splits to isolate, yielding higher anomaly scores.
-3. **Metric Exporting:** `exporter.py` runs a lightweight HTTP server publishing metrics (e.g., total log count, anomaly count, threat levels) that Prometheus scrapes periodically.
-
----
-
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more details.
-
----
-
-*Developed by [Danish Wani](https://github.com/Danishwani1999)*
