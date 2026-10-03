@@ -27,7 +27,7 @@
 ## 📖 About the Project
 When web servers scale or security breaches happen, answers are buried inside millions of log entries. Reading these files manually is impossible. 
 
-**Advance Log Detector** is an automated monitoring tool designed to ingest raw log files, apply efficient pattern matching, and detect anomalies (like brute-force attacks or 5xx server failures) before they lead to severe downtime.
+**Advance Log Detector** is an automated monitoring tool designed to ingest raw log files, apply efficient pattern matching, and detect anomalies (like brute-force attacks or server failures) before they lead to severe downtime.
 
 I built this project to demonstrate low-level log parsing, memory-efficient data streaming, and clean command-line interfaces suitable for modern backend and DevOps environments.
 
@@ -140,15 +140,6 @@ Advance_Log_Detector/
 ├── requirements.txt       # Project dependencies
 └── README.md
 ```
-
----
-
-## 🔮 Future Roadmap
-- [ ] Add integrations for Slack/Discord webhook alerts.
-- [ ] Create an interactive terminal dashboard using `rich` or `blessed`.
-- [ ] Export parsing metrics into Prometheus format.
-
----
 
 ## 📄 License
 Distributed under the MIT License. See `LICENSE` for more information.
