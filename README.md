@@ -4,7 +4,7 @@ A real-time AIOps monitoring pipeline that detects anomalous system log entries 
 
 ---
 
-## 🏗️️ Architecture & Monitoring Flow
+## 🏗️ Architecture & Monitoring Flow
 
 ```text
               System Logs
@@ -22,7 +22,9 @@ A real-time AIOps monitoring pipeline that detects anomalous system log entries 
              Prometheus
                    │
                    ▼
-               GrafanaComponentsLog Detector: Parses log streams, applies anomaly detection logic, and exposes custom Prometheus metrics on port 8000.Prometheus: Scrapes custom metrics from the Log Detector at regular intervals.Grafana: Pulls metric data from Prometheus to render dashboards and alerts.🚀 Getting StartedPrerequisitesDockerDocker ComposeRunning the StackTo start the entire monitoring stack in detached mode:Bashdocker compose up -d
+               Grafana
+
+ComponentsLog Detector: Parses log streams, applies anomaly detection logic, and exposes custom Prometheus metrics on port 8000.Prometheus: Scrapes custom metrics from the Log Detector at regular intervals.Grafana: Pulls metric data from Prometheus to render dashboards and alerts.🚀 Getting StartedPrerequisitesDockerDocker ComposeRunning the StackTo start the entire monitoring stack in detached mode:Bashdocker compose up -d
 📊 Project Output & Verification1. Docker Compose ServicesPlaintext$ docker compose ps
 
 NAME                    STATUS
