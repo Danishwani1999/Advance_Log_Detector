@@ -1,5 +1,4 @@
 # Python Virtual Environments
-Advance_Log_Detector/
 venv/
 .venv/
 env/
@@ -11,7 +10,7 @@ __pycache__/
 
 # Log Files & Datasets
 *.log
-system_logs.txt
+!data/*.log
 
 # Editor & OS Files
 .vscode/

@@ -6,9 +6,8 @@ services:
     command: python -u exporter.py
     ports:
       - "8000:8000"
-    volumes:
-      - ./sample_system.log:/app/sample_system.log
-    restart: unless-stopped
+        volumes:
+      - ./data/sample_system.log:/app/sample_system.log:ro
 
   # Prometheus Service for scraping and storing metrics
   prometheus:

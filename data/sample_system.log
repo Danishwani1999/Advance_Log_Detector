@@ -1,0 +1,7 @@
+2026-10-02 15:00:01 INFO Application started
+2026-10-02 15:00:05 INFO User request received
+2026-10-02 15:00:10 WARN High memory usage
+2026-10-02 15:00:15 ERROR Database connection refused
+2026-10-02 15:00:20 INFO Application recovered
+2026-10-02 15:01:00 ERROR Disk failure detected
+2026-10-02 15:05:00 ERROR Network connection failed
