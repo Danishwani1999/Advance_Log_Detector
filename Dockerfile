@@ -2,6 +2,7 @@ FROM python:3.10-slim
 
 # Set working directory inside the container
 WORKDIR /app
+ENV PYTHONPATH=/app/src
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,4 +20,4 @@ COPY . .
 EXPOSE 8000
 
 # Start the metrics exporter service
-CMD ["python", "exporter.py"]
+CMD ["python", "-m", "logdetector.exporter"]

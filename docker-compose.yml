@@ -3,7 +3,7 @@ services:
   log-detector:
     build: .
     container_name: log_anomaly_detector
-    command: python -u exporter.py
+    command: python -u -m logdetector.exporter
     ports:
       - "8000:8000"
     volumes:
