@@ -30,7 +30,7 @@ jobs:
         pytest -v
 
     - name: Run Trivy Vulnerability Scanner
-      uses: aquasecurity/trivy-action@0.18.0
+      uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
         scan-ref: '.'
