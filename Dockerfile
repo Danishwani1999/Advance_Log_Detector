@@ -1,23 +1,16 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
-# Set working directory inside the container
 WORKDIR /app
-ENV PYTHONPATH=/app/src
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN useradd -u 1000 appuser && chown -R appuser:appuser /app
 
-# Copy and install Python requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project source code
 COPY . .
 
-# Expose port for Prometheus metric scraping
-EXPOSE 8000
+USER appuser
 
-# Start the metrics exporter service
-CMD ["python", "-m", "logdetector.exporter"]
+HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/metrics')"
+
+CMD ["python", "main.py"]

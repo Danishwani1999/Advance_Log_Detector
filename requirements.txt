@@ -1,3 +1,2 @@
-pandas
-prometheus-client
-scikit-learn
+prometheus-client==0.20.0
+pytest==8.1.1

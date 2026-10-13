@@ -20,3 +20,6 @@ Thumbs.db
 
 # Environment variables / Secrets
 .env
+
+# Trained model (rebuilt by scripts/train.py)
+models/

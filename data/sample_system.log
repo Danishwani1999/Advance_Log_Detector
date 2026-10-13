@@ -1,7 +1,32 @@
-2026-10-02 15:00:01 INFO Application started
-2026-10-02 15:00:05 INFO User request received
-2026-10-02 15:00:10 WARN High memory usage
-2026-10-02 15:00:15 ERROR Database connection refused
-2026-10-02 15:00:20 INFO Application recovered
-2026-10-02 15:01:00 ERROR Disk failure detected
-2026-10-02 15:05:00 ERROR Network connection failed
+2026-10-01 10:00:02 [INFO] User login successful
+2026-10-01 10:00:04 [INFO] User login successful
+2026-10-01 10:00:11 [INFO] User login successful
+2026-10-01 10:00:21 [INFO] Cache refreshed
+2026-10-01 10:00:30 [INFO] Health check passed
+2026-10-01 10:00:31 [INFO] Health check passed
+2026-10-01 10:00:36 [WARN] High memory usage detected
+2026-10-01 10:00:38 [INFO] Health check passed
+2026-10-01 10:00:43 [INFO] Database connection established
+2026-10-01 10:00:50 [INFO] Cache refreshed
+2026-10-01 10:00:56 [INFO] User login successful
+2026-10-01 10:01:00 [ERROR] Failed to send email, will retry
+2026-10-01 10:01:02 [INFO] Request processed successfully
+2026-10-01 10:01:05 [INFO] User login successful
+2026-10-01 10:01:07 [INFO] Request processed successfully
+2026-10-01 10:01:10 [INFO] Request processed successfully
+2026-10-01 10:01:19 [INFO] Request processed successfully
+2026-10-01 10:01:20 [INFO] Health check passed
+2026-10-01 10:01:25 [INFO] Database connection established
+2026-10-01 10:01:31 [INFO] Request processed successfully
+2026-10-01 10:01:39 [INFO] Request processed successfully
+2026-10-01 10:01:48 [INFO] Request processed successfully
+2026-10-01 10:01:55 [ERROR] Request timeout while calling external service
+2026-10-01 10:02:03 [INFO] User login successful
+2026-10-01 10:02:06 [INFO] User login successful
+2026-10-01 10:02:13 [INFO] User login successful
+2026-10-01 10:02:22 [INFO] Scheduled backup job completed
+2026-10-01 10:02:31 [INFO] Health check passed
+2026-10-01 10:02:36 [INFO] Request processed successfully
+2026-10-01 10:02:41 [INFO] Database connection established
+2026-10-12 10:00:01 [WARN] Certificate expiry approaching for payments service
+2026-10-12 10:00:02 [ERROR] Kernel panic detected on node worker-3

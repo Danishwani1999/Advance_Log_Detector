@@ -75,7 +75,7 @@ def make_logs(count, with_problems, start):
             # a burst: the same error again and again in a short time
             for _ in range(random.randint(5, 8)):
                 now += timedelta(seconds=random.randint(1, 3))
-                rows.append((now, "ERROR", "Database connection refused", "error_burst"))
+                rows.append((now, "ERROR", "Request timeout while calling external service", "error_burst"))
         else:
             level, message = normal_line()
             rows.append((now, level, message, "normal"))

@@ -1,19 +1,10 @@
-"""Turn raw log lines into a table."""
-import re
-
-import pandas as pd
-
-# Matches: 2026-10-02 10:05:00 [CRITICAL] System crash detected (brackets optional)
-LOG_PATTERN = re.compile(
-    r"^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s+\[?(\w+)\]?\s+(.*)$"
-)
-
-
-def parse_lines(lines):
-    """Return a DataFrame with timestamp, level, message. Bad lines are skipped."""
-    rows = []
-    for line in lines:
-        match = LOG_PATTERN.match(line.strip())
-        if match:
-            rows.append(match.groups())
-    return pd.DataFrame(rows, columns=["timestamp", "level", "message"])
+def parse_log_line(line: str) -> str:
+    """Extracts log level from a standard log line."""
+    line_upper = line.upper()
+    if "ERROR" in line_upper:
+        return "ERROR"
+    elif "WARN" in line_upper or "WARNING" in line_upper:
+        return "WARNING"
+    elif "INFO" in line_upper:
+        return "INFO"
+    return "UNKNOWN"
