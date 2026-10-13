@@ -1,35 +1,42 @@
+on: '3.8'
+
 services:
-  log-exporter:  # (or whatever your service name is, e.g., log-anomaly-exporter)
+  log-detector:
     build: .
-    command: python src/logdetector/exporter.py
-    environment:
-      - PYTHONPATH=/app
+    container_name: log-detector
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
-    depends_on:
-      - prometheus
+      - ./sample_system.log:/app/sample_system.log
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/metrics')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   prometheus:
-    image: prom/prometheus:v2.51.0
+    image: prom/prometheus:v2.45.0
     container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:10.4.0
+    image: grafana/grafana:10.0.0
     container_name: grafana
     ports:
-      - "3001:3000"
+      - "3000:3000"
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
 
 volumes:

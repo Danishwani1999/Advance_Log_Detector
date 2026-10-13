@@ -1,16 +1,17 @@
-FROM python:3.12-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-RUN useradd -u 1000 appuser && chown -R appuser:appuser /app
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN chown -R appuser:appuser /app
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/metrics')"
+EXPOSE 8000
 
-CMD ["python", "src/logdetector/exporter.py"]
+CMD ["python", "exporter.py"]
