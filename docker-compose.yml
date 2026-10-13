@@ -1,44 +1,25 @@
-on: '3.8'
+version: '3.8'
 
 services:
-  log-detector:
+  detector:
     build: .
-    container_name: log-detector
     ports:
       - "8000:8000"
-    volumes:
-      - ./sample_system.log:/app/sample_system.log
+    environment:
+      - LOG_FILE_PATH=sample_system.log
+      - ERROR_THRESHOLD=0.3
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/metrics')"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   prometheus:
-    image: prom/prometheus:v2.45.0
-    container_name: prometheus
+    image: prom/prometheus:v2.47.0
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:10.0.0
-    container_name: grafana
+    image: grafana/grafana:10.1.0
     ports:
       - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
-
-volumes:
-  prometheus_data:
-  grafana_data:

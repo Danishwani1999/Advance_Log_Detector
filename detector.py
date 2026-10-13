@@ -1,39 +1,60 @@
-mport os
 import time
+import os
 import re
-from sklearn.ensemble import IsolationForest
-from sklearn.feature_extraction.text import TfidfVectorizer
+from prometheus_client import start_http_server, Counter, Gauge
+
+# Prometheus Metrics
+LOGS_PROCESSED = Counter('logs_processed_total', 'Total raw log lines processed from system file')
+ANOMALIES_DETECTED = Counter('anomalies_detected_total', 'Total error log anomalies flagged by rate detector')
+ERROR_RATE_GAUGE = Gauge('log_error_rate', 'Current proportion of error logs in the last processing window (0.0 - 1.0)')
 
 LOG_FILE = os.getenv("LOG_FILE_PATH", "sample_system.log")
+ERROR_THRESHOLD = float(os.getenv("ERROR_THRESHOLD", "0.3"))  # 30% error threshold in window
+ERROR_PATTERN = re.compile(r"ERROR|CRITICAL|FATAL|EXCEPTION", re.IGNORECASE)
 
-def parse_log_line(line):
-    # Extract log level (INFO, WARNING, ERROR, CRITICAL)
-    match = re.search(r'\b(INFO|WARNING|ERROR|CRITICAL)\b', line)
-    level = match.group(1) if match else "UNKNOWN"
-    return level, line.strip()
+def process_log_stream():
+    """Tail and monitor log file for anomalous error rates without re-reading entire file."""
+    if not os.path.exists(LOG_FILE):
+        print(f"Waiting for log file {LOG_FILE} to be created...")
+        return
 
-def detect_anomalies(log_lines):
-    if not log_lines:
-        return []
-    
-    texts = [l[1] for l in log_lines]
-    levels = [l[0] for l in log_lines]
-    
-    # Fallback if batch is too small for IsolationForest
-    if len(texts) < 2:
-        return [(lvl, txt, 0.0, 1 if lvl in ["ERROR", "CRITICAL"] else 0) for lvl, txt in log_lines]
-    
-    vectorizer = TfidfVectorizer(max_features=10)
-    X = vectorizer.fit_transform(texts).toarray()
-    
-    # Use dynamic contamination safely
-    clf = IsolationForest(contamination=0.1, random_state=42)
-    preds = clf.fit_predict(X) # -1 for anomaly, 1 for normal
-    
-    results = []
-    for i, txt in enumerate(texts):
-        is_anomaly = 1 if preds[i] == -1 or levels[i] in ["ERROR", "CRITICAL"] else 0
-        score = float(clf.decision_function(X[i].reshape(1, -1))[0])
-        results.append((levels[i], txt, score, is_anomaly))
+    with open(LOG_FILE, 'r') as f:
+        # Move to the end of file for streaming tail
+        f.seek(0, os.SEEK_END)
         
-    return results
+        window_total = 0
+        window_errors = 0
+        
+        while True:
+            line = f.readline()
+            if not line:
+                # Calculate metric on window idle or pause
+                if window_total > 0:
+                    rate = window_errors / window_total
+                    ERROR_RATE_GAUGE.set(rate)
+                    if rate >= ERROR_THRESHOLD:
+                        ANOMALIES_DETECTED.inc()
+                        print(f"[ALERT] Error spike detected! Window rate: {rate:.2f}")
+                    # Reset rolling window
+                    window_total = 0
+                    window_errors = 0
+                
+                time.sleep(1)
+                continue
+
+            LOGS_PROCESSED.inc()
+            window_total += 1
+
+            if ERROR_PATTERN.search(line):
+                window_errors += 1
+
+if __name__ == "__main__":
+    print("Starting Prometheus Exporter on port 8000...")
+    start_http_server(8000)
+    print("Monitoring log stream for anomalies...")
+    while True:
+        try:
+            process_log_stream()
+        except Exception as e:
+            print(f"Error encountered in log reader loop: {e}")
+            time.sleep(3)
