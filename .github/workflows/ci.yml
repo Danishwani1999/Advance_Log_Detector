@@ -1,0 +1,54 @@
+name: AIOps Log Detector CI
+
+# Tells GitHub: "Run this whenever I push code or open a pull request to main"
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Grab your code from the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python so we can test the script locally first
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      # Step 3: Install all your project dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Run a quick smoke test to ensure your Isolation Forest model trains without errors
+      - name: Test ML Model Training
+        run: |
+          mkdir -p models
+          python scripts/train.py
+
+      # Step 5: Build your Docker image to make sure it packages correctly
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: log-detector:test
+          load: true
+
+      # Step 6: Scan the built image for security vulnerabilities using Trivy
+      - name: Run Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'log-detector:test'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
