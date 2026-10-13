@@ -1,11 +1,15 @@
 services:
-  log-exporter:
+  log-exporter:  # (or whatever your service name is, e.g., log-anomaly-exporter)
     build: .
-    container_name: log-anomaly-exporter
+    command: python src/logdetector/exporter.py
+    environment:
+      - PYTHONPATH=/app
     ports:
       - "8000:8000"
     volumes:
       - ./data:/app/data
+    depends_on:
+      - prometheus
     restart: unless-stopped
 
   prometheus:
