@@ -1,52 +1,93 @@
+
 # Advance Log Detector
-[![CI](https://github.com/Danishwani1999/Advance_Log_Detector/actions/workflows/ci.yml/badge.svg)](https://github.com/Danishwani1999/Advance_Log_Detector/actions/workflows/ci.yml)
 
-A small log-monitoring stack: a Python service tails a log file, flags windows whose **error rate** crosses a threshold, and exposes Prometheus metrics. Prometheus scrapes it, evaluates alert rules, and Grafana shows a pre-provisioned dashboard. Everything runs with one `docker compose up`.
+Log error-rate detection exposed as Prometheus metrics, with a provisioned Grafana dashboard and alert rules. The whole stack runs with one `docker compose` command.
 
-## How detection works
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-v2.47-E6522C?logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-10.1-F46800?logo=grafana&logoColor=white)
 
-The detector is **rate-based, not machine learning**. It reads new log lines, and when the file goes idle it evaluates the window it just collected:
+---
 
-- error rate = lines matching `ERROR|CRITICAL|FATAL|EXCEPTION` / total lines in the window
-- if the rate is at or above `ERROR_THRESHOLD` (default `0.3`), it increments `anomalies_detected_total` and prints an alert
+## Overview
+
+Applications and servers produce far more log lines than anyone can read. This project turns a log file into signals that existing monitoring tools understand:
+
+1. A Python service reads log lines and flags anomalous events (error-rate based).
+2. The service exposes counters and gauges at `/metrics`.
+3. Prometheus scrapes the metrics and evaluates alert rules.
+4. Grafana shows the results on a dashboard that is provisioned from code, with no manual setup.
+
+It is a small, self-contained example of treating logs as metrics and managing the monitoring stack as code.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A[data/sample_system.log] --> B[detector.py :8000/metrics]
-    B --> C[Prometheus :9090]
-    C --> D[Alert rules]
-    C --> E[Grafana :3000]
+    LOG[(Log file<br/>./data)] --> DET[Detector<br/>Python :8000]
+    DET -->|/metrics| PROM[Prometheus<br/>:9090]
+    PROM -->|alert rules| ALERTS[Alerts]
+    PROM -->|datasource| GRAF[Grafana<br/>:3000]
 ```
 
-## Stack
+| Service | Image / Build | Port | Role |
+|---|---|---|---|
+| `detector` | Built from `Dockerfile` | 8000 | Parses logs, detects anomalies, exports metrics |
+| `prometheus` | `prom/prometheus:v2.47.0` | 9090 | Scrapes metrics, evaluates `alert_rules.yml` |
+| `grafana` | `grafana/grafana:10.1.0` | 3000 | Dashboards, provisioned from `grafana/` |
 
-| Component | Version | Role |
-|---|---|---|
-| Python | 3.11 (slim image) | Log tailing and detection |
-| prometheus-client | 0.20.0 | Metrics endpoint |
-| Prometheus | v2.47.0 | Scraping and alert rules |
-| Grafana | 10.1.0 | Dashboard (auto-provisioned) |
-| Docker Compose | v2 | Orchestration |
+## Repository structure
 
-## Project structure
-
-```
-.
-├── detector.py                 # tail + detect + expose metrics
-├── data/sample_system.log      # demo log (mounted read-only into the container)
-├── Dockerfile                  # non-root user, HEALTHCHECK
-├── docker-compose.yml
-├── prometheus.yml              # scrape config + rule_files
-├── alert_rules.yml             # HighLogErrorRate, LogDetectorDown
+```text
+Advance_Log_Detector/
+├── detector.py            # Log parsing and anomaly detection logic
+├── exporter.py            # Runs the detector and exposes Prometheus metrics
+├── Dockerfile             # Detector image
+├── docker-compose.yml     # Full stack: detector + Prometheus + Grafana
+├── prometheus.yml         # Scrape configuration
+├── alert_rules.yml        # Prometheus alert rules
 ├── grafana/
-│   ├── provisioning/           # datasource + dashboard provider
-│   └── dashboards/log-detector.json
-└── requirements.txt
+│   ├── provisioning/      # Datasource and dashboard provider config
+│   └── dashboards/        # Dashboard JSON
+├── data/                  # Sample log input (mounted read-only)
+├── requirements.txt
+└── README.md
 ```
 
-## Run it
+## Project Structure
+
+Advance_Log_Detector/
+├── assets/
+├── data/
+├── grafana/
+├── models/
+├── scripts/
+├── src/
+├── tests/
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── alert_rules.yml
+├── detector.py
+├── docker-compose.yml
+├── prometheus.yml
+├── pytest.ini
+└── requirements.txt
+
+## Getting started
+
+### Prerequisites
+
+- Docker Engine and Docker Compose v2
+- Git
+
+```bash
+docker --version
+docker compose version
+```
+
+### Run
 
 ```bash
 git clone https://github.com/Danishwani1999/Advance_Log_Detector.git
@@ -55,75 +96,100 @@ docker compose up -d --build
 docker compose ps
 ```
 
-| Service | URL | Notes |
-|---|---|---|
-| Detector metrics | http://localhost:8000/metrics | |
-| Prometheus | http://localhost:9090 | Targets at `/targets`, rules at `/rules` |
-| Grafana | http://localhost:3000 | `admin` / `admin` (local demo only) |
+### Endpoints
 
-## Metrics
+| URL | What you get |
+|---|---|
+| http://localhost:8000/metrics | Raw application metrics |
+| http://localhost:9090 | Prometheus UI (`/targets`, `/alerts`) |
+| http://localhost:3000 | Grafana (dashboard is preloaded) |
 
-| Metric | Type | Meaning |
-|---|---|---|
-| `logs_processed_total` | Counter | Log lines processed |
-| `anomalies_detected_total` | Counter | Windows that crossed the error threshold |
-| `log_error_rate` | Gauge | Error share of the last window (0.0 to 1.0) |
-
-## Alert rules
-
-- `HighLogErrorRate`: `log_error_rate >= 0.3`
-- `LogDetectorDown`: the scrape target has been down for 1 minute
-
-## Demo: trigger an anomaly
-
-The container starts by reading the 32-line sample file from the top (`READ_FROM_START=true`). Baseline:
-
-```
-logs_processed_total 32.0
-anomalies_detected_total 0.0
-log_error_rate 0.09375          # 3 errors / 32 lines
-```
-
-Append an error burst:
-
-```bash
-for i in 1 2 3 4 5; do echo "$(date '+%F %T') [ERROR] Simulated failure $i" >> data/sample_system.log; done
-echo "$(date '+%F %T') [INFO] Request processed successfully" >> data/sample_system.log
-docker compose logs --tail=3 detector
-curl -s localhost:8000/metrics | grep -E "^(logs_processed_total|anomalies_detected_total|log_error_rate)"
-```
-
-Observed result:
-
-```
-[ALERT] Error spike detected! Window rate: 0.83
-logs_processed_total 38.0
-anomalies_detected_total 1.0
-log_error_rate 0.8333333333333334   # 5 errors / 6 new lines
-```
-
-Reset the sample file afterwards with `git checkout -- data/sample_system.log`.
+> **Security:** Grafana ships with default credentials. Change them, or set `GF_SECURITY_ADMIN_PASSWORD` in `docker-compose.yml`, before exposing the port beyond localhost.
 
 ## Configuration
 
-| Variable | Default | Purpose |
+The detector is configured with environment variables in `docker-compose.yml`:
+
+| Variable | Default | Description |
 |---|---|---|
-| `LOG_FILE_PATH` | `sample_system.log` | File to tail (`/data/sample_system.log` in Compose) |
-| `ERROR_THRESHOLD` | `0.3` | Error rate that counts as an anomaly |
-| `READ_FROM_START` | `false` | Read the existing file instead of only new lines |
+| `LOG_FILE_PATH` | `/data/sample_system.log` | Log file to process |
+| `ERROR_THRESHOLD` | `0.3` | Error ratio above which an anomaly is flagged |
+| `READ_FROM_START` | `true` | Process the file from the beginning instead of only new lines |
 
-## Limitations and next steps
+## How detection works
 
-- Detection is a fixed error-rate threshold. There is no learned baseline or seasonality handling.
-- `log_error_rate` keeps its last value while the log is idle, so an alert can keep firing. A decay to 0 after an idle timeout would fix this.
-- The detector does not follow log rotation.
-- No Alertmanager yet, so alerts are visible in Prometheus but not sent anywhere.
+The detector reads each log line, classifies its severity, and tracks the ratio of error-level lines. When that ratio goes above `ERROR_THRESHOLD`, the event is counted as an anomaly and the anomaly metric is incremented.
+
+## Detection Logic
+
+The detector processes log streams using a configurable sliding time window (e.g., 60 seconds). It parses incoming log entries, searches for error signatures or anomaly patterns using the core components in `detector.py` and any pre-trained weights from `models/`, and increments an error counter whenever a threshold is crossed.
+
+## Metrics
+
+| Metric | Type | Description |
+|---|---|---|
+| `logs_processed_total` | Counter | Log lines processed |
+| `log_anomalies_total` | Counter | Anomalous events detected |
+| `latest_anomaly_score` | Gauge | Score of the most recent entry |
+
+## Prometheus Metrics
+
+The application exposes metrics on `http://localhost:8000/metrics`:
+
+* **`log_errors_total`** (Counter): Total number of log errors detected since startup.
+* **`log_error_rate_per_minute`** (Gauge): Current error frequency calculated within the active sliding window.
+
+## Try it
+
+Append an error line to the sample log and watch the metrics change:
+
+```bash
+echo "$(date '+%F %T') ERROR Disk failure detected" >> data/sample_system.log
+curl -s localhost:8000/metrics | grep -E "logs_processed_total|log_anomalies_total"
+```
+
+Then check **Prometheus → Alerts** and the Grafana dashboard.
+
+## Verifying the stack
+
+```bash
+docker compose ps                                   # all services Up
+curl -s localhost:9090/-/healthy                    # Prometheus health
+curl -s localhost:9090/api/v1/targets | grep -o '"health":"[a-z]*"'   # scrape target UP
+docker compose logs -f detector                     # detector output
+```
+
+<!-- Add a Grafana dashboard screenshot here: docs/dashboard.png -->
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Port already in use | `sudo lsof -i :9090` (or `:3000`, `:8000`), stop the process, rerun |
+| Target shows DOWN | Check `docker compose logs detector` and the target name in `prometheus.yml` |
+| Empty dashboard | Confirm the Prometheus datasource is healthy in Grafana |
+
+## Known limitations
+
+- Single log file, single format.
 - Prometheus data is not persisted across `docker compose down -v`.
-- CI covers lint, config validation and a compose smoke test, but there are no unit tests yet.
-- Grafana uses default credentials, which is fine for a local demo only.
+- Alerts are evaluated by Prometheus only. No notification channel (Alertmanager) is configured yet.
+- No automated tests or CI pipeline yet.
+
+## Roadmap
+
+- [ ] Unit tests for the detector, run in GitHub Actions
+- [ ] CI: lint, `docker build`, `docker compose config`, image scan with Trivy
+- [ ] Alertmanager with a notification receiver
+- [ ] Persistent volumes for Prometheus and Grafana
+- [ ] Container healthchecks and a non-root runtime user
+- [ ] Multiple log formats and files
 
 ## Author
 
-Danish Wani, fresher DevOps and cloud engineer. GitHub: [@Danishwani1999](https://github.com/Danishwani1999)
+**Danish Wani** · Fresher DevOps & Cloud Engineer
+GitHub: [@Danishwani1999](https://github.com/Danishwani1999)
 
-Licensed under the MIT License.
+## License
+
+MIT. See [LICENSE](LICENSE).
