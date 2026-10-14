@@ -1,0 +1,46 @@
+{
+  "title": "Log Detector Overview",
+  "uid": "log-detector",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Logs Processed",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [ { "expr": "logs_processed_total", "refId": "A" } ]
+    },
+    {
+      "id": 2, "type": "stat", "title": "Anomalies Detected",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [ { "expr": "anomalies_detected_total", "refId": "A" } ],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } } }
+    },
+    {
+      "id": 3, "type": "gauge", "title": "Current Error Rate",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [ { "expr": "log_error_rate", "refId": "A" } ],
+      "fieldConfig": { "defaults": { "min": 0, "max": 1, "unit": "percentunit",
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null }, { "color": "red", "value": 0.3 } ] } } }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Error Rate Over Time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [ { "expr": "log_error_rate", "legendFormat": "error rate", "refId": "A" } ],
+      "fieldConfig": { "defaults": { "min": 0, "max": 1, "unit": "percentunit" } }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Log Throughput (lines/min)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [ { "expr": "rate(logs_processed_total[5m]) * 60", "legendFormat": "lines/min", "refId": "A" } ]
+    }
+  ]
+}

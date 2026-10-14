@@ -1,0 +1,18 @@
+groups:
+  - name: log-detector
+    rules:
+      - alert: HighLogErrorRate
+        expr: log_error_rate >= 0.3
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Log error rate is {{ $value | humanizePercentage }}"
+          description: "Error share in the last log window crossed the 30% threshold."
+      - alert: LogDetectorDown
+        expr: up{job="log_detector_service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Log detector target is down"
