@@ -119,7 +119,7 @@ Reset the sample file afterwards with `git checkout -- data/sample_system.log`.
 - The detector does not follow log rotation.
 - No Alertmanager yet, so alerts are visible in Prometheus but not sent anywhere.
 - Prometheus data is not persisted across `docker compose down -v`.
-- No automated tests or CI yet.
+- CI covers lint, config validation and a compose smoke test, but there are no unit tests yet.
 - Grafana uses default credentials, which is fine for a local demo only.
 
 ## Author
