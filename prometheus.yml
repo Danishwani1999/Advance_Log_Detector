@@ -1,8 +1,7 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 15s
 
 scrape_configs:
   - job_name: 'log_detector_service'
     static_configs:
-      - targets: ['log-exporter:8000']   # <-- Change this to log-exporter and save the file
-
+      - targets: ['detector:8000']

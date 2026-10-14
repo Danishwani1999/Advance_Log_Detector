@@ -1,13 +1,14 @@
-version: '3.8'
-
 services:
   detector:
     build: .
     ports:
       - "8000:8000"
     environment:
-      - LOG_FILE_PATH=sample_system.log
+      - LOG_FILE_PATH=/data/sample_system.log
       - ERROR_THRESHOLD=0.3
+      - READ_FROM_START=true
+    volumes:
+      - ./data:/data:ro
     restart: unless-stopped
 
   prometheus:
@@ -16,10 +17,14 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - detector
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:10.1.0
     ports:
       - "3000:3000"
+    depends_on:
+      - prometheus
     restart: unless-stopped
