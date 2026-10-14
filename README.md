@@ -1,4 +1,5 @@
 # Advance Log Detector
+[![CI](https://github.com/Danishwani1999/Advance_Log_Detector/actions/workflows/ci.yml/badge.svg)](https://github.com/Danishwani1999/Advance_Log_Detector/actions/workflows/ci.yml)
 
 A small log-monitoring stack: a Python service tails a log file, flags windows whose **error rate** crosses a threshold, and exposes Prometheus metrics. Prometheus scrapes it, evaluates alert rules, and Grafana shows a pre-provisioned dashboard. Everything runs with one `docker compose up`.
 
