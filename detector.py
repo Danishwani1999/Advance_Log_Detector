@@ -1,7 +1,6 @@
 import os
 import re
 import time
-
 from prometheus_client import Counter, Gauge, start_http_server
 
 # Prometheus metrics
@@ -14,14 +13,12 @@ ERROR_THRESHOLD = float(os.getenv("ERROR_THRESHOLD", "0.3"))  # 30% errors in a 
 READ_FROM_START = os.getenv("READ_FROM_START", "false").lower() == "true"
 ERROR_PATTERN = re.compile(r"ERROR|CRITICAL|FATAL|EXCEPTION", re.IGNORECASE)
 
-
 def is_error(line):
     """Return True if the log line looks like an error."""
     return bool(ERROR_PATTERN.search(line))
 
-
 def process_log_stream():
-    """Tail the log file and flag windows whose error rate crosses the threshold."""
+    """Tail the log file continuously and update metrics."""
     if not os.path.exists(LOG_FILE):
         print(f"Waiting for log file {LOG_FILE} to be created...")
         time.sleep(3)
@@ -37,15 +34,7 @@ def process_log_stream():
         while True:
             line = f.readline()
             if not line:
-                # No new data: evaluate the window we just collected
-                if window_total > 0:
-                    rate = window_errors / window_total
-                    ERROR_RATE_GAUGE.set(rate)
-                    if rate >= ERROR_THRESHOLD:
-                        ANOMALIES_DETECTED.inc()
-                        print(f"[ALERT] Error spike detected! Window rate: {rate:.2f}")
-                    window_total = 0
-                    window_errors = 0
+                # No new line yet: sleep briefly and keep checking for appended logs
                 time.sleep(1)
                 continue
 
@@ -54,6 +43,12 @@ def process_log_stream():
             if is_error(line):
                 window_errors += 1
 
+            if window_total > 0:
+                rate = window_errors / window_total
+                ERROR_RATE_GAUGE.set(rate)
+                if rate >= ERROR_THRESHOLD:
+                    ANOMALIES_DETECTED.inc()
+                    print(f"[ALERT] Error spike detected! Window rate: {rate:.2f}")
 
 if __name__ == "__main__":
     print("Starting Prometheus exporter on port 8000...")
