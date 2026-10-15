@@ -15,6 +15,8 @@ jobs:
           python-version: "3.11"
       - name: Lint Python
         run: pip install flake8 && flake8 --max-line-length=120 detector.py
+      - name: Unit tests
+        run: pip install -r requirements.txt pytest && pytest -v
       - name: Validate compose file
         run: docker compose config -q
       - name: Validate dashboard JSON

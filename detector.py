@@ -15,6 +15,11 @@ READ_FROM_START = os.getenv("READ_FROM_START", "false").lower() == "true"
 ERROR_PATTERN = re.compile(r"ERROR|CRITICAL|FATAL|EXCEPTION", re.IGNORECASE)
 
 
+def is_error(line):
+    """Return True if the log line looks like an error."""
+    return bool(ERROR_PATTERN.search(line))
+
+
 def process_log_stream():
     """Tail the log file and flag windows whose error rate crosses the threshold."""
     if not os.path.exists(LOG_FILE):
@@ -46,7 +51,7 @@ def process_log_stream():
 
             LOGS_PROCESSED.inc()
             window_total += 1
-            if ERROR_PATTERN.search(line):
+            if is_error(line):
                 window_errors += 1
 
 
