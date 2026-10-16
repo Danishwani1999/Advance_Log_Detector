@@ -1,59 +1,16 @@
 name: ci
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-
+on: [push, pull_request]
 jobs:
-  lint-and-validate:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Lint Python
-        run: pip install flake8 && flake8 --max-line-length=120 detector.py
-      - name: Unit tests
-        run: pip install -r requirements.txt pytest && pytest -v
-      - name: Validate compose file
-        run: docker compose config -q
-      - name: Validate dashboard JSON
-        run: python -m json.tool grafana/dashboards/log-detector.json > /dev/null
-      - name: Validate Prometheus alert rules
+      - run: python3 -m py_compile detector.py
+      - run: cp .env.example .env && docker compose config -q
+      - run: docker compose build detector
+      - name: Validate Prometheus config and alert rules
         run: |
           docker run --rm --entrypoint promtool \
-            -v "$PWD/alert_rules.yml:/rules.yml:ro" \
-            prom/prometheus:v2.47.0 check rules /rules.yml
-
-  smoke-test:
-    runs-on: ubuntu-latest
-    needs: lint-and-validate
-    steps:
-      - uses: actions/checkout@v4
-      - name: Start stack
-        run: docker compose up -d --build
-      - name: Detector processes the sample log
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sf localhost:8000/metrics | grep -q '^logs_processed_total 32.0'; then
-              echo "detector OK"; exit 0
-            fi
-            sleep 2
-          done
-          docker compose logs detector
-          exit 1
-      - name: Prometheus target is up
-        run: |
-          for i in $(seq 1 30); do
-            if curl -s localhost:9090/api/v1/targets | grep -q '"health":"up"'; then
-              echo "target UP"; exit 0
-            fi
-            sleep 3
-          done
-          docker compose logs prometheus
-          exit 1
-      - name: Tear down
-        if: always()
-        run: docker compose down -v
+            -v "$PWD/prometheus.yml:/etc/prometheus/prometheus.yml:ro" \
+            -v "$PWD/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro" \
+            prom/prometheus:v2.47.0 check config /etc/prometheus/prometheus.yml

@@ -1,83 +1,31 @@
 # Advance Log Detector
 
-Log error-rate detection exposed as Prometheus metrics, with a provisioned Grafana dashboard and alert rules. The whole stack runs with one `docker compose` command.
+Log error-rate detector that exposes Prometheus metrics, with provisioned Grafana dashboard and alert rules (Docker Compose).
+Detection is threshold-based: the error rate is compared to ERROR_THRESHOLD (default 0.3). No ML is used.
 
-
-
-![Grafana dashboard](assets/grafana_dashboard.png)
-
-
+Author: Danish Wani
 
 ## Architecture
+    data/sample_system.log -> detector (:8000/metrics) -> Prometheus (:9090, alert_rules.yml) -> Grafana (:3000)
 
-```mermaid
-flowchart LR
-    LOG[(Log file ./data)] --> DET[Detector :8000]
-    DET -->|/metrics| PROM[Prometheus :9090]
-    PROM -->|alert rules| ALERTS[Alerts]
-    PROM -->|datasource| GRAF[Grafana :3000]
-```
-
-## Repository structure
-
-```text
-├── detector.py            # Tails the log, computes error rate, exports metrics
-├── Dockerfile             # Non-root image with healthcheck
-├── docker-compose.yml     # detector + Prometheus + Grafana
-├── prometheus.yml         # Scrape config
-├── alert_rules.yml        # HighLogErrorRate, LogDetectorDown
-├── grafana/               # Provisioned datasource and dashboard
-├── data/                  # Sample log (mounted read-only)
-├── tests/                 # pytest unit tests
-└── .github/workflows/     # CI: lint, tests, config validation, smoke test
-```
+## Services
+| Service | Port (localhost) | Notes |
+|---|---|---|
+| detector | 8000 | non-root user, HEALTHCHECK, read-only log mount |
+| prometheus | 9090 | v2.47.0, persistent volume, 15d retention, alert rules |
+| grafana | 3000 | v10.1.0, provisioned datasource/dashboard, persistent volume |
 
 ## Run
+    cp .env.example .env     # set GRAFANA_ADMIN_PASSWORD
+    docker compose up -d --build
+    curl localhost:8000/metrics
+    curl localhost:9090/-/healthy
 
-```bash
-docker compose up -d --build
-```
-
-| URL | What |
-|---|---|
-| http://localhost:8000/metrics | Raw metrics |
-| http://localhost:9090 | Prometheus |
-| http://localhost:3000 | Grafana (set `GF_SECURITY_ADMIN_PASSWORD` in a `.env` file) |
-
-## Configuration
-
-| Variable | Default | Description |
-|---|---|---|
-| `LOG_FILE_PATH` | `/data/sample_system.log` | Log file to read |
-| `ERROR_THRESHOLD` | `0.3` | Error ratio that counts as an anomaly |
-| `READ_FROM_START` | `true` | Read from the start instead of only new lines |
-
-## Metrics
-
-| Metric | Type | Description |
-|---|---|---|
-| `logs_processed_total` | Counter | Log lines processed |
-| `anomalies_detected_total` | Counter | Windows whose error rate crossed the threshold |
-| `log_error_rate` | Gauge | Error share (0.0 to 1.0) of the last processed window |
-
-A window is the batch of lines read between polls, not a fixed time period.
-
-## Try it
-
-```bash
-echo "$(date '+%F %T') [ERROR] Disk failure" >> data/sample_system.log
-curl -s localhost:8000/metrics | grep -E "logs_processed_total|anomalies_detected_total"
-```
+## Config (env vars on detector)
+LOG_FILE_PATH, ERROR_THRESHOLD, READ_FROM_START
 
 ## CI
+GitHub Actions: syntax check, compose validation, image build, promtool config/rule check.
 
-GitHub Actions runs flake8, pytest, `docker compose config`, dashboard JSON validation, `promtool check rules`, and a smoke test of the full stack.
-
-## Known limitations
-
-- Single log file and format; no log-rotation handling.
-- No Alertmanager receiver and no persistent volumes for Prometheus or Grafana.
-
-## License
-
-MIT
+## Next steps
+Alertmanager, unit tests for detector, multiple log formats.
