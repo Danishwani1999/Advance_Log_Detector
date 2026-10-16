@@ -29,3 +29,20 @@ GitHub Actions: syntax check, compose validation, image build, promtool config/r
 
 ## Next steps
 Alertmanager, unit tests for detector, multiple log formats.
+
+## Screenshots
+Grafana dashboard after injecting 20 ERROR lines (error rate 44.2%, anomalies flagged):
+
+
+
+![Grafana dashboard](docs/grafana-anomaly.png)
+
+
+
+Prometheus alert HighLogErrorRate firing (rule: log_error_rate >= 0.3):
+
+
+
+![Prometheus alert](docs/prometheus-alert.png)
+
+
