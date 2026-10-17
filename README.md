@@ -53,3 +53,10 @@ Prometheus alert HighLogErrorRate firing (rule: log_error_rate >= 0.3):
 ![Webhook delivery](docs/webhook-log.png)
 
 
+
+### Alertmanager routing
+
+
+![Alertmanager](docs/alertmanager.png)
+
+
