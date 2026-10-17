@@ -46,3 +46,10 @@ Prometheus alert HighLogErrorRate firing (rule: log_error_rate >= 0.3):
 ![Prometheus alert](docs/prometheus-alert.png)
 
 
+
+### Webhook delivery
+
+
+![Webhook delivery](assets/webhook-log.png)
+
+
