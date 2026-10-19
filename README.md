@@ -3,7 +3,7 @@
 Log error-rate detector that exposes Prometheus metrics, with provisioned Grafana dashboard and alert rules (Docker Compose).
 Detection is threshold-based: the error rate is compared to ERROR_THRESHOLD (default 0.3). No ML is used.
 
-Author: Danish Wani
+Author: Danish Ahmad Wani
 
 ## Architecture
     data/sample_system.log -> detector (:8000/metrics) -> Prometheus (:9090, alert_rules.yml) -> Grafana (:3000)
