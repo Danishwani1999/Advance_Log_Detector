@@ -65,6 +65,8 @@ docker compose ps
 | `LOG_FILE_PATH` | `/data/sample_system.log` | Log file to read |
 | `ERROR_THRESHOLD` | `0.3` | Error rate that counts as a spike |
 | `READ_FROM_START` | `true` | Read from the beginning |
+| `WINDOW_SIZE` | `20` | Number of most recent lines per window |
+| `MIN_SAMPLES` | `5` | Minimum lines before a window is judged |
 
 ---
 
@@ -88,13 +90,13 @@ prometheus      prom/prometheus:v2.47.0         Up 31 minutes
 ```text
 # HELP logs_processed_total Total raw log lines processed from system file
 # TYPE logs_processed_total counter
-logs_processed_total 42.0
+logs_processed_total 50.0
 # HELP anomalies_detected_total Total error-rate anomalies flagged by the detector
 # TYPE anomalies_detected_total counter
 anomalies_detected_total 1.0
 # HELP log_error_rate Proportion of error logs in the last processing window (0.0 - 1.0)
 # TYPE log_error_rate gauge
-log_error_rate 0.30952380952380953
+log_error_rate 0.95
 ```
 
 ### Prometheus targets
