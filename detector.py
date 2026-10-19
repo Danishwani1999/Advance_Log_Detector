@@ -14,7 +14,7 @@ ERROR_THRESHOLD = float(os.getenv("ERROR_THRESHOLD", "0.3"))  # 30% errors in a 
 READ_FROM_START = os.getenv("READ_FROM_START", "false").lower() == "true"
 WINDOW_SIZE = int(os.getenv("WINDOW_SIZE", "20"))  # number of most recent lines per window
 MIN_SAMPLES = int(os.getenv("MIN_SAMPLES", "5"))  # don't judge a window with fewer lines
-ERROR_PATTERN = re.compile(r"ERROR|CRITICAL|FATAL|EXCEPTION", re.IGNORECASE)
+ERROR_PATTERN = re.compile(r"\b(ERROR|CRITICAL|FATAL|EXCEPTION)\b", re.IGNORECASE)
 
 
 def is_error(line):
