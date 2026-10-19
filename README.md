@@ -1,16 +1,16 @@
-# 🤖 Advance Log Detector
+# Advance Log Detector
 
 A small monitoring stack I built to learn how logs, metrics and alerts fit together. A Python service reads a log file, works out the share of error lines, flags a spike, and exposes it as Prometheus metrics. Prometheus fires alerts, Alertmanager routes them to a webhook, and Grafana draws it all on a dashboard. Everything runs with Docker Compose.
 
 ---
 
-## 📌 Why I built this
+## Why I built this
 
 I wanted to see the full alerting path work end to end: a log line goes bad, a metric moves, an alert fires, a message lands somewhere. The detection logic is deliberately simple; the goal was the DevOps plumbing around it.
 
 ---
 
-## ⚙️ How it works
+## How it works
 
 1. `detector.py` reads the log file and parses lines with regular expressions.
 2. It tracks the share of error lines in the current window.
@@ -31,7 +31,7 @@ flowchart TD
 
 ---
 
-## 🧰 Tech stack
+## Tech stack
 
 | Tool | Role |
 | --- | --- |
@@ -43,7 +43,7 @@ flowchart TD
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 ```bash
 git clone git@github.com:Danishwani1999/Advance_Log_Detector.git
@@ -68,7 +68,7 @@ docker compose ps
 
 ---
 
-## 📊 What it looks like when it runs
+## What it looks like when it runs
 
 Real output from my machine, captured right after `docker compose up`.
 
@@ -112,7 +112,7 @@ LogDetectorDown - inactive
 
 ---
 
-## 🖼️ Screenshots
+## Screenshots
 
 ### Grafana dashboard showing the detected anomaly
 
@@ -132,7 +132,7 @@ LogDetectorDown - inactive
 
 ---
 
-## 🧪 Try it yourself
+## Try it yourself
 
 ```bash
 for i in 1 2 3 4 5; do echo "2026-10-19 12:00:0$i ERROR Disk failure detected" >> data/sample_system.log; done
@@ -145,7 +145,7 @@ Then open `http://localhost:9090/alerts` to watch the alert fire.
 
 ---
 
-## 🛠️ Things that went wrong (and the fixes)
+## Things that went wrong (and the fixes)
 
 * **Target DOWN.** Prometheus must scrape the Compose service name (`detector:8000`). My README and compose file once disagreed, so the output above is captured from the running stack.
 * **Grafana empty.** Provisioning needed a single datasource and a proper dashboard provider.
@@ -153,7 +153,7 @@ Then open `http://localhost:9090/alerts` to watch the alert fire.
 
 ---
 
-## 🎯 What I learned
+## What I learned
 
 * Non-root containers with healthchecks
 * How scrape jobs, alert rules and Alertmanager routes connect
@@ -164,7 +164,7 @@ Then open `http://localhost:9090/alerts` to watch the alert fire.
 
 ---
 
-## 🚀 Next steps
+## Next steps
 
 * Multiple log files and formats
 * A statistical detector instead of a fixed threshold
@@ -173,10 +173,10 @@ Then open `http://localhost:9090/alerts` to watch the alert fire.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Danish Ahmad Wani** · https://github.com/Danishwani1999
 
-## 📄 License
+## License
 
 MIT. See [LICENSE](LICENSE).
