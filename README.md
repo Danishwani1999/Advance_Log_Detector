@@ -66,25 +66,21 @@ log_detector_service http://detector:8000/metrics up
 
 ## Screenshots
 
+### Grafana dashboard showing the detected anomaly
 
+![Grafana dashboard showing the detected anomaly](docs/grafana-anomaly.png)
 
+### Prometheus alert firing
 
+![Prometheus alert firing](docs/prometheus-alert.png)
 
+### Alertmanager
 
+![Alertmanager](docs/alertmanager.png)
 
+### Webhook receiving the alert
 
-
-
-
-
-
-
-
-
-
-
-
-
+![Webhook receiving the alert](docs/webhook-log.png)
 
 ## Author
 
