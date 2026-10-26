@@ -60,6 +60,8 @@ docker compose ps
 | Alertmanager | 9093 |
 | Grafana | 3000 |
 
+Grafana login: user and password come from `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` in your `.env`. Compose refuses to start without a password.
+
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `LOG_FILE_PATH` | `/data/sample_system.log` | Log file to read |
