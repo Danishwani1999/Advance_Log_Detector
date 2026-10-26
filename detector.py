@@ -6,8 +6,14 @@ from prometheus_client import Counter, Gauge, start_http_server
 
 # Prometheus metrics
 LOGS_PROCESSED = Counter('logs_processed_total', 'Total raw log lines processed from system file')
-ANOMALIES_DETECTED = Counter('anomalies_detected_total', 'Total error-rate anomalies flagged by the detector')
-ERROR_RATE_GAUGE = Gauge('log_error_rate', 'Proportion of error logs in the last processing window (0.0 - 1.0)')
+ANOMALIES_DETECTED = Counter(
+    'anomalies_detected_total',
+    'Total error-rate anomalies flagged by the detector',
+)
+ERROR_RATE_GAUGE = Gauge(
+    'log_error_rate',
+    'Proportion of error logs in the last processing window (0.0 - 1.0)',
+)
 
 LOG_FILE = os.getenv("LOG_FILE_PATH", "sample_system.log")
 ERROR_THRESHOLD = float(os.getenv("ERROR_THRESHOLD", "0.3"))  # 30% errors in a window = anomaly

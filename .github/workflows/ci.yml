@@ -14,3 +14,12 @@ jobs:
             -v "$PWD/prometheus.yml:/etc/prometheus/prometheus.yml:ro" \
             -v "$PWD/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro" \
             prom/prometheus:v2.47.0 check config /etc/prometheus/prometheus.yml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: pip install -r requirements.txt pytest flake8
+      - name: Lint
+        run: flake8 detector.py tests --max-line-length=100
+      - name: Unit tests
+        run: pytest -q

@@ -2,7 +2,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-import detector
+import detector  # noqa: E402
 
 
 def test_error_rate_empty_window():
