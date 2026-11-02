@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf install -y docker git
+systemctl enable --now docker
+
+# Install the Compose plugin and refuse to continue if the download does not match the pinned checksum.
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-compose \
+  "https://github.com/docker/compose/releases/download/${compose_version}/docker-compose-linux-x86_64"
+echo "${compose_sha256}  /usr/local/lib/docker/cli-plugins/docker-compose" | sha256sum -c -
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Compose needs buildx >= 0.17 to build images; the version in the AL2023 repo is too old.
+curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-buildx \
+  "https://github.com/docker/buildx/releases/download/v0.30.1/buildx-v0.30.1.linux-amd64"
+echo "c37114fcd034025ec68e224657c8a5a850df472ded3ddcbca75ad3a7ebb9710d  /usr/local/lib/docker/cli-plugins/docker-buildx" | sha256sum -c -
+chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+
+git clone --depth 1 --branch "${git_ref}" "${repo_url}" /opt/log-detector
+cd /opt/log-detector
+
+# Read the Grafana password from Parameter Store with the instance role and write it to a private .env file.
+PASSWORD="$(aws ssm get-parameter --name "${ssm_parameter}" --with-decryption --query Parameter.Value --output text --region "${region}")"
+umask 077
+printf 'GRAFANA_ADMIN_USER=admin\nGRAFANA_ADMIN_PASSWORD=%s\n' "$PASSWORD" > .env
+unset PASSWORD
+
+docker compose up -d --build

@@ -1,0 +1,6 @@
+# Copy to backend.hcl (ignored by git) and set your own bucket name.
+bucket       = "YOUR-STATE-BUCKET"
+key          = "advance-log-detector/terraform.tfstate"
+region       = "ap-south-1"
+encrypt      = true
+use_lockfile = true
