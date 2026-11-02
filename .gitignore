@@ -22,3 +22,11 @@ Thumbs.db
 .env
 
 *.swp
+
+# Terraform
+.terraform/
+*.tfstate*
+crash.log
+terraform.tfvars
+backend.hcl
+tfplan
