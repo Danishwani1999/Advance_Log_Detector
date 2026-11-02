@@ -153,6 +153,43 @@ Then open `http://localhost:9090/alerts` to watch the alert fire.
 
 The same stack can run on a single EC2 instance, created and destroyed with Terraform (`terraform/`).
 
+**Runtime architecture**
+
+```mermaid
+flowchart TB
+    user["You (browser)<br/>allowed only from your /32"]
+    admin["Admin shell via<br/>SSM Session Manager<br/>(no SSH key)"]
+
+    subgraph aws["AWS account, ap-south-1"]
+        subgraph vpc["VPC 10.20.0.0/16"]
+            igw["Internet gateway"]
+            subgraph ec2["EC2 t3.small in public subnet<br/>IMDSv2, encrypted disk, Elastic IP"]
+                direction LR
+                det["detector<br/>exporter"] -->|metrics| prom["Prometheus<br/>+ alert rules"]
+                prom --> graf["Grafana :3000"]
+                prom -->|alerts| am["Alertmanager"] --> wh["alert-webhook"]
+            end
+        end
+        ssm[("SSM Parameter Store<br/>Grafana password")]
+    end
+
+    user -->|"HTTP 3000<br/>(security group)"| igw --> graf
+    admin -.-> ec2
+    ec2 -.->|"IAM role reads<br/>one parameter at boot"| ssm
+```
+
+**Delivery flow**
+
+```mermaid
+flowchart LR
+    pr["Pull request"] --> ci["GitHub Actions"]
+    ci --> v["validate job<br/>compose, promtool,<br/>flake8, pytest"]
+    ci --> t["terraform job<br/>fmt, validate, Checkov"]
+    t -->|merge to main| tf["terraform plan / apply<br/>(run locally)"]
+    tf --> aws["AWS resources"]
+    tf -.->|remote state| s3[("S3 bucket<br/>versioned, encrypted,<br/>native lock")]
+```
+
 | Piece | What it does |
 |---|---|
 | VPC, public subnet, internet gateway | Own network, default security group emptied |
