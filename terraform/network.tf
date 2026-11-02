@@ -1,7 +1,3 @@
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 resource "aws_vpc" "main" {
   #checkov:skip=CKV2_AWS_11:Lab environment. VPC flow logs would add cost and a log pipeline for no benefit here.
   cidr_block           = var.vpc_cidr
@@ -24,7 +20,7 @@ resource "aws_internet_gateway" "main" {
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.subnet_cidr
-  availability_zone       = data.aws_availability_zones.available.names[0]
+  availability_zone       = var.availability_zone
   map_public_ip_on_launch = false
 
   tags = {

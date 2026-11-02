@@ -61,3 +61,9 @@ variable "subnet_cidr" {
   type        = string
   default     = "10.20.1.0/24"
 }
+
+variable "availability_zone" {
+  description = "Availability Zone for the subnet. Must belong to the chosen region and offer the instance type."
+  type        = string
+  default     = "ap-south-1a"
+}
