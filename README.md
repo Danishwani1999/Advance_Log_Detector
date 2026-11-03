@@ -40,6 +40,7 @@ flowchart TD
 | Grafana 10.1 | Dashboard provisioned from files |
 | Docker Compose | Runs all five services |
 | GitHub Actions, pytest, flake8 | CI, tests, lint |
+| Terraform, AWS (EC2, VPC, IAM, SSM, S3) | Optional cloud deployment, Checkov scan in CI |
 
 ---
 
@@ -243,7 +244,7 @@ CI runs `terraform fmt`, `validate` and a Checkov scan on every push. Known limi
 * Multiple log files and formats
 * A statistical detector instead of a fixed threshold
 * Slack or email alerts
-* Deploy to a cloud VM or Kubernetes
+* Run it on Kubernetes (the AWS EC2 deployment with Terraform is done, see above)
 
 ---
 
